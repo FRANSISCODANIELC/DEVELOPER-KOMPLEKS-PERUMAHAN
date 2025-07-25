@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Developer Kompleks Perumahan</title>
+    <link rel="stylesheet" href="login_style.css">
+    <style>
+        /* Gaya tambahan untuk pop-up modal */
+        .modal {
+            display: none; /* Sembunyikan secara default */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            width: 300px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .modal-content input {
+            width: calc(100% - 22px);
+            padding: 11px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        /* Tombol di dalam modal */
+        .modal-content button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        /* Tombol Mulai Permainan (dibuat sama seperti tombol login) */
+        #start-game-button {
+            background-color: #007bff;
+            color: white;
+        }
+        #start-game-button:hover {
+            background-color: #0056b3;
+        }
+        /* Tombol Batal */
+        #cancel-button {
+            background-color: #6c757d;
+            color: white;
+        }
+        #cancel-button:hover {
+            background-color: #5a6268;
+        }
+
+        /* Gaya untuk modal pemilihan map */
+        #map-selection-modal .modal-content button {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="dashboard-box">
+            <h1>Main Menu</h1>
+            <h2 id="welcome-message"></h2>
+            <button class="menu-button" id="new-game-main-button">New Game</button>
+            <button class="menu-button" disabled>Load Game (Segera Hadir)</button>
+            <a href="index.html" class="menu-button">Exit</a>
+        </div>
+    </div>
+
+    <!-- Modal untuk Atur Modal -->
+    <div id="capital-modal" class="modal">
+        <div class="modal-content">
+            <h3>Atur Modal Awal</h3>
+            <p>Masukkan jumlah modal yang Anda inginkan.</p>
+            <input type="number" id="capital-input" placeholder="Contoh: 1000" min="100">
+            <button id="start-game-button">Mulai Permainan</button>
+            <button id="cancel-button">Batal</button>
+        </div>
+    </div>
+
+    <!-- Modal untuk Pemilihan Map -->
+    <div id="map-selection-modal" class="modal">
+        <div class="modal-content">
+            <h3>Pilih Ukuran Map</h3>
+            <button class="menu-button" onclick="openCapitalModal(9)">Map 1 (9x9)</button>
+            <button class="menu-button" onclick="openCapitalModal(11)">Map 2 (11x11)</button>
+            <button class="menu-button" onclick="openCapitalModal(13)">Map 3 (13x13)</button>
+            <button class="menu-button" onclick="closeMapSelectionModal()">Batal</button>
+        </div>
+    </div>
+
+    <script>
+        const username = localStorage.getItem('username');
+        if (username) {
+            document.getElementById('welcome-message').textContent = `Selamat Datang, ${username}!`;
+        } else {
+            window.location.href = 'index.html';
+        }
+
+        const newGameMainButton = document.getElementById('new-game-main-button');
+        const mapSelectionModal = document.getElementById('map-selection-modal');
+        const capitalModal = document.getElementById('capital-modal');
+        const capitalInput = document.getElementById('capital-input');
+        const startGameButton = document.getElementById('start-game-button');
+        const cancelButton = document.getElementById('cancel-button');
+        let selectedGridSize = 0;
+
+        // Fungsi untuk membuka modal pemilihan map
+        newGameMainButton.addEventListener('click', () => {
+            mapSelectionModal.style.display = 'flex';
+        });
+
+        // Fungsi untuk menutup modal pemilihan map
+        function closeMapSelectionModal() {
+            mapSelectionModal.style.display = 'none';
+        }
+
+        function openCapitalModal(size) {
+            selectedGridSize = size;
+            mapSelectionModal.style.display = 'none'; // Sembunyikan modal pemilihan map
+            capitalModal.style.display = 'flex';
+            capitalInput.focus();
+        }
+
+        function closeModal() {
+            capitalModal.style.display = 'none';
+            capitalInput.value = '';
+        }
+
+        startGameButton.addEventListener('click', () => {
+            const capital = parseInt(capitalInput.value);
+            if (isNaN(capital) || capital < 100) {
+                alert('Modal harus berupa angka dan minimal 100.');
+                return;
+            }
+            window.location.href = `game.html?size=${selectedGridSize}&capital=${capital}`;
+        });
+
+        cancelButton.addEventListener('click', closeModal);
+
+        // Menutup modal jika mengklik di luar area konten
+        window.onclick = function(event) {
+            if (event.target == capitalModal) {
+                closeModal();
+            } else if (event.target == mapSelectionModal) {
+                closeMapSelectionModal();
+            }
+        }
+    </script>
+</body>
+</html>
