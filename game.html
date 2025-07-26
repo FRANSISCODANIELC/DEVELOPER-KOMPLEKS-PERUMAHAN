@@ -40,6 +40,7 @@
                 <button class="menu-button">Resume Game</button>
                 <button class="menu-button">Save (Segera Hadir)</button>
                 <button class="menu-button" onclick="window.location.href='dashboard.html'">New Game</button>
+                <button class="menu-button" id="rules-button">Aturan</button>
                 <button class="menu-button">Option (Segera Hadir)</button>
                 <button class="menu-button" onclick="window.location.href='dashboard.html'">Quit Map</button>
                 <button class="menu-button" onclick="window.location.href='index.html'">Exit</button>
@@ -71,6 +72,28 @@
                 </div>
                 <p id="progress-text">0 hari</p>
                 <button id="skip-button" class="action-button" style="margin-top: 15px;">Skip</button>
+            </div>
+        </div>
+
+        <!-- Pop-up Aturan -->
+        <div id="rules-popup" class="popup">
+            <div class="popup-content">
+                <h3>Aturan Permainan</h3>
+                <p><strong>Tujuan:</strong> Bangun kompleks perumahan yang menguntungkan.</p>
+                <p><strong>Cara Bermain:</strong></p>
+                <ul>
+                    <li>Pilih bangunan dari panel di kanan.</li>
+                    <li>Klik atau seret di grid untuk menempatkan bangunan.</li>
+                    <li><strong>Rumah:</strong> Sumber pendapatan utama. Harus terhubung ke jalan untuk bisa dijual.</li>
+                    <li><strong>Taman:</strong> Mengurangi waktu penjualan rumah di sekitarnya.</li>
+                    <li><strong>Jalan Utama (Hitam):</strong> Menghubungkan rumah ke jaringan jalan.</li>
+                    <li><strong>Jalan Sekunder (Cokelat):</strong> Menghubungkan ke jalan lain.</li>
+                    <li><strong>Mushollah:</strong> Mengurangi waktu penjualan rumah di sekitarnya. Harus terhubung ke jalan.</li>
+                    <li><strong>Penghapus:</strong> Untuk menghapus bangunan yang sudah ditempatkan.</li>
+                </ul>
+                <p><strong>Penjualan:</strong> Klik tombol "Jual" untuk memulai simulasi penjualan. Rumah yang terhubung ke jalan akan terjual.</p>
+                <p><strong>Skor:</strong> Dihitung berdasarkan keuntungan dikurangi penalti waktu penjualan.</p>
+                <button id="close-rules-popup" class="menu-button">Tutup</button>
             </div>
         </div>
 
