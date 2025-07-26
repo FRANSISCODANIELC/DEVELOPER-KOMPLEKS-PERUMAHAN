@@ -22,6 +22,7 @@ function initGame() {
     const progressText = document.getElementById('progress-text');
     const soldUnitsCount = document.getElementById('sold-units-count');
     const closeSummaryButton = document.getElementById('close-summary');
+    const skipButton = document.getElementById('skip-button');
 
     // Elemen untuk menampilkan jumlah bangunan
     const countRumahEl = document.getElementById('count-rumah');
@@ -47,10 +48,15 @@ function initGame() {
     const itemInfo = {
         rumah: { biaya: 50, nilaiJual: 120, baseSellingTime: 30, icon: 'fa-home' }, // 30 hari standar
         taman: { biaya: 5, nilaiJual: 0, effectPercentage: 0.15, icon: 'fa-tree' }, // 15% pengurangan waktu
-        jalan: { biaya: 2, nilaiJual: 0, effectPercentage: 0.02, type: 'block' }, // 2% pengurangan waktu
+        jalan_utama: { biaya: 2, nilaiJual: 0, effectPercentage: 0.02, type: 'road', blockClass: 'jalan-block-utama' }, // 2% pengurangan waktu
+        jalan_sekunder: { biaya: 1, nilaiJual: 0, effectPercentage: 0.01, type: 'road', blockClass: 'jalan-block-sekunder' }, // 1% pengurangan waktu
         mushollah: { biaya: 50, nilaiJual: 0, effectPercentage: 0.25, icon: 'fa-mosque' }, // 25% pengurangan waktu
         eraser: { biaya: 0 } // Eraser tidak memiliki biaya atau dampak
     };
+
+    function formatNumberWithThousandsSeparator(number) {
+        return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
 
     function resetGame() {
         sisaAnggaran = initialAnggaran;
@@ -101,12 +107,12 @@ function initGame() {
         return Math.sqrt(Math.pow(r2 - r1, 2) + Math.pow(c2 - c1, 2));
     }
 
-    // Helper: Cek apakah rumah terhubung dengan jalan
-    function isHouseConnectedToRoad(row, col) {
-        // Periksa 8 sel di sekitar rumah (termasuk diagonal)
+    // Helper: Cek apakah bangunan terhubung dengan jalan
+    function isConnectedToRoad(row, col) {
+        // Periksa 8 sel di sekitar bangunan (termasuk diagonal)
         for (let dr = -1; dr <= 1; dr++) {
             for (let dc = -1; dc <= 1; dc++) {
-                if (dr === 0 && dc === 0) continue; // Lewati sel rumah itu sendiri
+                if (dr === 0 && dc === 0) continue; // Lewati sel bangunan itu sendiri
 
                 const neighborRow = row + dr;
                 const neighborCol = col + dc;
@@ -114,13 +120,38 @@ function initGame() {
                 // Pastikan tetangga berada di dalam batas grid
                 if (neighborRow >= 0 && neighborRow < gridSize &&
                     neighborCol >= 0 && neighborCol < gridSize) {
-                    if (gameGrid[neighborRow][neighborCol] === 'jalan') {
+                    const neighborType = gameGrid[neighborRow][neighborCol];
+                    if (neighborType && (neighborType === 'jalan_utama' || neighborType === 'jalan_sekunder')) {
                         return true; // Terhubung dengan jalan
                     }
                 }
             }
         }
         return false; // Tidak terhubung dengan jalan
+    }
+
+    // Helper: Cek apakah jalan terhubung dengan jalan lain
+    function isRoadConnectedToOtherRoad(row, col) {
+        // Periksa 8 sel di sekitar jalan (termasuk diagonal)
+        for (let dr = -1; dr <= 1; dr++) {
+            for (let dc = -1; dc <= 1; dc++) {
+                if (dr === 0 && dc === 0) continue; // Lewati sel jalan itu sendiri
+
+                const neighborRow = row + dr;
+                const neighborCol = col + dc;
+
+                // Pastikan tetangga berada di dalam batas grid
+                if (neighborRow >= 0 && neighborRow < gridSize &&
+                    neighborCol >= 0 && neighborCol < gridSize) {
+                    const neighborType = gameGrid[neighborRow][neighborCol];
+                    if (neighborType && (neighborType === 'jalan_utama' || neighborType === 'jalan_sekunder')) {
+                        // Jika ada jalan lain di sekitarnya, maka terhubung
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     // Fungsi untuk memulai aksi (klik atau drag)
@@ -173,6 +204,16 @@ function initGame() {
             return;
         }
 
+        // Validasi konektivitas untuk mushollah dan jalan sekunder
+        if (selectedTool === 'mushollah' && !isConnectedToRoad(row, col)) {
+            alert("Mushollah harus terhubung dengan jalan!");
+            return;
+        }
+        if (selectedTool === 'jalan_sekunder' && !isRoadConnectedToOtherRoad(row, col)) {
+            alert("Jalan sekunder harus terhubung dengan jalan lain!");
+            return;
+        }
+
         sisaAnggaran -= item.biaya;
         totalBiaya += item.biaya;
         totalKeuntungan += (item.nilaiJual - item.biaya);
@@ -187,8 +228,8 @@ function initGame() {
         }
 
         // Update tampilan sel
-        if (item.type === 'block') {
-            cell.innerHTML = '<div class="jalan-block"></div>';
+        if (item.type === 'road') {
+            cell.innerHTML = `<div class="${item.blockClass}"></div>`;
         } else {
             cell.innerHTML = `<i class="fas ${item.icon}"></i>`;
         }
@@ -255,7 +296,7 @@ function initGame() {
         for (let r = 0; r < gridSize; r++) {
             for (let c = 0; c < gridSize; c++) {
                 if (gameGrid[r][c] === 'rumah') {
-                    if (isHouseConnectedToRoad(r, c)) {
+                    if (isConnectedToRoad(r, c)) {
                         sellableHouses++;
                         let houseSellingTime = itemInfo.rumah.baseSellingTime; // Waktu dasar 30 hari
                         let totalReductionPercentage = 0;
@@ -263,7 +304,7 @@ function initGame() {
                         for (let r2 = 0; r2 < gridSize; r2++) {
                             for (let c2 = 0; c2 < gridSize; c2++) {
                                 const buildingType = gameGrid[r2][c2];
-                                if (buildingType && (buildingType === 'taman' || buildingType === 'jalan' || buildingType === 'mushollah')) {
+                                if (buildingType && (buildingType === 'taman' || buildingType === 'jalan_utama' || buildingType === 'jalan_sekunder' || buildingType === 'mushollah')) {
                                     const distance = calculateDistance(r, c, r2, c2);
                                     if (distance > 0) { // Pastikan bukan sel rumah itu sendiri
                                         const itemEffect = itemInfo[buildingType].effectPercentage;
@@ -295,7 +336,8 @@ function initGame() {
         showPopup(loadingPopup);
         progressBarFill.style.width = '0%';
         progressText.textContent = `0 hari`;
-        soldUnitsCount.textContent = sellableHouses; // Tampilkan total rumah yang akan terjual
+
+        let animationFrameId; // Variabel untuk menyimpan ID animasi frame
 
         const updateProgress = () => {
             const elapsedTime = Date.now() - startTime;
@@ -303,24 +345,45 @@ function initGame() {
             if (progressDays > totalSellingTime) progressDays = totalSellingTime;
 
             const progressPercentage = (progressDays / totalSellingTime) * 100;
+            const currentSoldUnits = Math.min(sellableHouses, Math.floor(sellableHouses * (progressDays / totalSellingTime)));
+            soldUnitsCount.textContent = currentSoldUnits;
 
             progressBarFill.style.width = `${progressPercentage}%`;
             progressText.textContent = `${Math.round(progressDays)} hari`;
 
             if (progressDays < totalSellingTime) {
-                requestAnimationFrame(updateProgress);
+                animationFrameId = requestAnimationFrame(updateProgress);
             } else {
-                hidePopup(loadingPopup);
-                document.getElementById('summary-modal').textContent = `Rp. ${totalBiaya}`;
-                document.getElementById('summary-terjual').textContent = sellableHouses;
-                document.getElementById('summary-penjualan').textContent = `Rp. ${totalBiaya + totalKeuntungan}`;
-                document.getElementById('summary-keuntungan').textContent = `Rp. ${totalKeuntungan}`;
-                document.getElementById('summary-waktu').textContent = totalSellingTime;
-                showPopup(summaryPopup);
+                showSummary();
             }
         };
 
+        const showSummary = () => {
+            hidePopup(loadingPopup);
+            const finalTotalPenjualan = sellableHouses * itemInfo.rumah.nilaiJual;
+            const rumahTidakTerjual = jumlahRumah - sellableHouses;
+            const kerugian = itemInfo.rumah.biaya * rumahTidakTerjual;
+            const finalTotalKeuntungan = finalTotalPenjualan - totalBiaya - kerugian;
+            const PENALTY_FACTOR = 4; // Faktor penalti yang disarankan
+            const overallScore = finalTotalKeuntungan - (totalSellingTime * PENALTY_FACTOR);
+
+            document.getElementById('summary-modal').textContent = `Rp. ${formatNumberWithThousandsSeparator(totalBiaya)}`;
+            document.getElementById('summary-terjual').textContent = formatNumberWithThousandsSeparator(sellableHouses);
+            document.getElementById('summary-penjualan').textContent = `Rp. ${formatNumberWithThousandsSeparator(finalTotalPenjualan)}`;
+            document.getElementById('summary-tidak-terjual').textContent = formatNumberWithThousandsSeparator(rumahTidakTerjual);
+            document.getElementById('summary-kerugian').textContent = `Rp. -${formatNumberWithThousandsSeparator(kerugian)}`;
+            document.getElementById('summary-keuntungan').textContent = `Rp. ${finalTotalKeuntungan >= 0 ? '+' : ''}${formatNumberWithThousandsSeparator(finalTotalKeuntungan)}`;
+            document.getElementById('summary-waktu').textContent = formatNumberWithThousandsSeparator(totalSellingTime);
+            document.getElementById('summary-score').textContent = formatNumberWithThousandsSeparator(overallScore);
+            showPopup(summaryPopup);
+        };
+
         requestAnimationFrame(updateProgress);
+
+        skipButton.onclick = () => {
+            cancelAnimationFrame(animationFrameId);
+            showSummary();
+        };
     }
 
     buildingButtonsContainer.addEventListener('click', (e) => {

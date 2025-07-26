@@ -15,6 +15,12 @@ body {
     flex-direction: column; /* Stack game and info panel vertically */
     align-items: center; /* Center children horizontally */
     gap: 20px;
+    border: 5px solid #0056b3; /* Border tetap */
+    padding: 20px; /* Tambahkan padding agar konten tidak terlalu mepet border */
+    border-radius: 15px; /* Sudut membulat untuk border */
+    max-width: 1000px; /* Batasi lebar maksimum */
+    max-height: 700px; /* Batasi tinggi maksimum */
+    box-sizing: border-box; /* Pastikan padding dan border termasuk dalam ukuran */
 }
 
 /* Halaman Game */
@@ -33,6 +39,10 @@ body {
     display: flex; /* Untuk memusatkan grid di dalamnya */
     justify-content: center;
     align-items: center;
+    max-width: 600px; /* Batasi lebar maksimum grid card */
+    max-height: 600px; /* Batasi tinggi maksimum grid card */
+    overflow: auto; /* Tambahkan scroll jika konten melebihi batas */
+    box-sizing: border-box; /* Pastikan padding dan border termasuk dalam ukuran */
 }
 
 #grid-container {
@@ -62,10 +72,18 @@ body {
 .fa-tree { color: #27ae60; }
 .fa-mosque { color: #2980b9; }
 .fa-eraser { color: #e74c3c; }
+.fa-road { color: #333; } /* Warna default untuk ikon jalan */
+.fa-road.sekunder { color: #8B4513; } /* Warna cokelat untuk ikon jalan sekunder */
 
 /* Jalan sebagai blok hitam */
-.jalan-block {
+.jalan-block-utama {
     background-color: #333 !important;
+    width: 100%;
+    height: 100%;
+}
+
+.jalan-block-sekunder {
+    background-color: #8B4513 !important; /* Cokelat */
     width: 100%;
     height: 100%;
 }
@@ -82,7 +100,7 @@ body {
 }
 
 #project-info-panel {
-    width: 500px;
+    width: 840px; /* Lebar disesuaikan dengan total lebar grid-card + info-panel + gap */
     padding: 15px;
     background-color: #ffffff;
     border-radius: 10px;
@@ -177,6 +195,19 @@ body {
     align-items: center;
 }
 
+/* Gaya untuk ringkasan penjualan */
+#summary-popup .popup-content p {
+    margin-bottom: 5px;
+}
+
+#summary-modal { color: #ff8c00; } /* Orange */
+#summary-terjual { color: #800080; } /* Ungu */
+#summary-penjualan { color: #a0522d; } /* Cokelat */
+#summary-tidak-terjual, #summary-kerugian { color: #dc3545; } /* Merah */
+#summary-keuntungan { color: #28a745; } /* Hijau */
+#summary-waktu { color: #007bff; } /* Biru */
+#summary-score { color: #ffc107; } /* Kuning/Emas untuk skor */
+
 .popup-content {
     background-color: #fefefe;
     margin: auto;
@@ -190,7 +221,7 @@ body {
 
 /* Gaya untuk tombol menu di dalam pop-up (disalin dari login_style.css) */
 .popup-content .menu-button {
-    width: 100%;
+    width: 200px; /* Lebar tetap untuk konsistensi */
     padding: 12px;
     border: none;
     border-radius: 4px;
@@ -199,8 +230,8 @@ body {
     font-size: 16px;
     cursor: pointer;
     display: block;
+    margin: 0 auto 10px auto; /* Pusatkan tombol dan berikan margin bawah */
     text-decoration: none;
-    margin-bottom: 10px;
 }
 
 .popup-content .menu-button:hover {
