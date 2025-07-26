@@ -23,6 +23,9 @@ function initGame() {
     const soldUnitsCount = document.getElementById('sold-units-count');
     const closeSummaryButton = document.getElementById('close-summary');
     const skipButton = document.getElementById('skip-button');
+    const rulesButton = document.getElementById('rules-button');
+    const rulesPopup = document.getElementById('rules-popup');
+    const closeRulesPopup = document.getElementById('close-rules-popup');
 
     // Elemen untuk menampilkan jumlah bangunan
     const countRumahEl = document.getElementById('count-rumah');
@@ -408,6 +411,17 @@ function initGame() {
 
     if (menuButton) {
         menuButton.addEventListener('click', () => showPopup(menuPopup));
+    }
+
+    if (rulesButton) {
+        rulesButton.addEventListener('click', () => {
+            hidePopup(menuPopup); // Sembunyikan menu utama
+            showPopup(rulesPopup); // Tampilkan pop-up aturan
+        });
+    }
+
+    if (closeRulesPopup) {
+        closeRulesPopup.addEventListener('click', () => hidePopup(rulesPopup));
     }
 
     const resumeGameButton = menuPopup.querySelector('button');
